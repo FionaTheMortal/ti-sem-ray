@@ -630,22 +630,22 @@ BasisFromQuaternion(quaternion value)
 {
 	basis Result;
 
-	f32 Y2 = 2.0f * Quaternion.Y * Quaternion.Y;
-	f32 Z2 = 2.0f * Quaternion.Z * Quaternion.Z;
-	f32 X2 = 2.0f * Quaternion.X * Quaternion.X;
+	f32 Y2 = 2.0f * value.Y * value.Y;
+	f32 Z2 = 2.0f * value.Z * value.Z;
+	f32 X2 = 2.0f * value.X * value.X;
 
-	f32 XY = 2.0f * Quaternion.X * Quaternion.Y;
-	f32 XZ = 2.0f * Quaternion.X * Quaternion.Z;
+	f32 XY = 2.0f * value.X * value.Y;
+	f32 XZ = 2.0f * value.X * value.Z;
 
-	f32 WX = 2.0f * Quaternion.W * Quaternion.X;
-	f32 WY = 2.0f * Quaternion.W * Quaternion.Y;
-	f32 WZ = 2.0f * Quaternion.W * Quaternion.Z;
+	f32 WX = 2.0f * value.W * value.X;
+	f32 WY = 2.0f * value.W * value.Y;
+	f32 WZ = 2.0f * value.W * value.Z;
 
-	f32 YZ = 2.0f * Quaternion.Y * Quaternion.Z;
+	f32 YZ = 2.0f * value.Y * value.Z;
 
-	Result.X = (1.0f - Y2 - Z2,        XY + WZ,        XZ - WY);
-	Result.Y = (       XY - WZ, 1.0f - X2 - Z2,        YZ + WX);
-	Result.Z = (       XZ + WY,        YZ - WX, 1.0f - X2 - Y2);
+	Result.X = V3F(1.0f - Y2 - Z2,        XY + WZ,        XZ - WY);
+	Result.Y = V3F(       XY - WZ, 1.0f - X2 - Z2,        YZ + WX);
+	Result.Z = V3F(       XZ + WY,        YZ - WX, 1.0f - X2 - Y2);
 
 	return Result;
 }

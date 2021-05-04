@@ -1,7 +1,22 @@
+// NOTES:
+// 
+// Screen and image coordinates are interpreted as
+// X from left to right
+// Y from bottom to top
+// So (0, 0) is the bottom left corner
+
 #include "ti_sem_ray_def.h"
 #include "ti_sem_ray_math.h"
 
 #include "ti_sem_ray.h"
+
+internal f32
+CameraAspectRatio(const camera *Camera)
+{
+	f32 Result = ((f32)Camera->ResolutionY / (f32)Camera->ResolutionX);
+
+	return Result;
+}
 
 internal void
 UpdateCamera(camera *Camera)
@@ -9,18 +24,32 @@ UpdateCamera(camera *Camera)
 	Camera->Basis = BasisFromQuaternion(Camera->Orientation);
 
 	Camera->FilmDimX = 2.0f * Tan(Camera->HorizontalFOV / 2.0f);
-	Camera->FilmDimY = (Camera->ResolutionY / Camera->ResolutionX) *  Camera->FilmDimX;
+	Camera->FilmDimY = CameraAspectRatio(Camera) *  Camera->FilmDimX;
 }
 
 internal v3f
-FilmToWorldPos(camera *Camera, f32 X, f32 Y)
+WorldPosFromFilmPos(const camera *Camera, f32 X, f32 Y)
 {
-	f32 OffsetX = (X / Camera->ResolutionX) - 0.5f;
-	f32 OffsetY = (Y / Camera->ResolutionY) - 0.5f;
+	f32 OffsetX = (X / (f32)Camera->ResolutionX) - 0.5f;
+	f32 OffsetY = (Y / (f32)Camera->ResolutionY) - 0.5f;
 
 	v3f Result = 
+		Camera->Basis.X * 1 + 
 		Camera->Basis.Y * (-OffsetX) + 
-		Camera->Basis.Z *   OffsetY;
+		Camera->Basis.Z * OffsetY;
+
+	return Result;
+}
+
+internal ray
+RayFromFilmPos(const camera *Camera, f32 X, f32 Y)
+{
+	ray Result;
+	
+	v3f WorldPos = WorldPosFromFilmPos(Camera, X, Y);
+
+	Result.Pos = Camera->Pos;
+	Result.Dir = NOZ(WorldPos - Camera->Pos);
 
 	return Result;
 }
@@ -31,7 +60,9 @@ main(int argc, char *argv)
 	camera Camera = {};
 	Camera.Orientation = QuaternionIdentity();
 	Camera.Pos = V3F(0, 0, 0);
-	Camera.HorizontalFOV = 103.0f;
+	Camera.HorizontalFOV = 90.0f;
+	Camera.ResolutionX = 512;
+	Camera.ResolutionY = 512;
 
 	UpdateCamera(&Camera);
 
@@ -46,25 +77,9 @@ main(int argc, char *argv)
 			f32 SampleX = (f32)IndexX + 0.5f;
 			f32 SampleY = (f32)IndexY + 0.5f;
 
-			v3f PixelPosition = FilmToWorldPos(&Camera, SampleX, SampleY);
+			ray Ray = RayFromFilmPos(&Camera, SampleX, SampleY);
+
+
 		}
 	}
-
-	v3f x = V3F(1.0f, 0.0f, 0.0f);
-	v3f y = V3F(0.0f, 1.0f, 0.0f);
-	v3f z = V3F(0.0f, 0.0f, 1.0f);
-
-	v3f p = V3F(0.0f, 0.0f, 0.0f);
-
-	f32 horrizontal_fov = 103.0f;
-	f32 horrizontal_fov_rad = DegToRad(horrizontal_fov);
-
-	s32 i = 0;
-	s32 j = 0;
-
-	f32 pos_x = Tan(horrizontal_fov_rad / 2.0f) * ((i + 0.5f) / 1920.0f - 0.5f);
-	f32 pos_y = Tan(horrizontal_fov_rad / 2.0f) * ((j + 0.5f) / 1080.0f - 0.5f) * (1080.0f / 1920.0f);
-
-	v3f p_pos = -pos_x * y + pos_y * z + x;
-	v3f p_ray = NOZ(p_pos - p);
 }
