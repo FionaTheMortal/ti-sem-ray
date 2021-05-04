@@ -1,0 +1,15 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <None Include="..\build.bat" />
+    <None Include="..\..\code\README.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\code\ti_sem_ray.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\code\ti_sem_ray.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_math.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_def.h" />
+  </ItemGroup>
+</Project>
