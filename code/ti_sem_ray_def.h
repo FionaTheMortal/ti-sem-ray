@@ -1,6 +1,8 @@
 #ifndef TI_SEM_RAY_DEF_H
 #define TI_SEM_RAY_DEF_H
 
+#include <stddef.h>
+
 #if defined(_MSC_VER)
 #if _MSC_VER < 1300
 typedef unsigned char     u8;
@@ -40,12 +42,12 @@ typedef  int64_t s64;
 #define STATIC_ASSERT_1(expression, line)    STATIC_ASSERT_2(expression, line)
 #define STATIC_ASSERT(expression)            STATIC_ASSERT_1(expression, SOURCE_LINE)
 
-STATIC_ASSERT(sizeof(u8) == sizeof(s8));
+STATIC_ASSERT(sizeof(u8)  == sizeof(s8));
 STATIC_ASSERT(sizeof(u16) == sizeof(s16));
 STATIC_ASSERT(sizeof(u32) == sizeof(s32));
 STATIC_ASSERT(sizeof(u64) == sizeof(s64));
 
-STATIC_ASSERT(sizeof(u8) == 1);
+STATIC_ASSERT(sizeof(u8)  == 1);
 STATIC_ASSERT(sizeof(u16) == 2);
 STATIC_ASSERT(sizeof(u32) == 4);
 STATIC_ASSERT(sizeof(u64) == 8);
@@ -76,14 +78,24 @@ typedef char c8;
 #define S64_MIN (-0x7fffffffffffffffll - 1)
 #define S64_MAX 0x7fffffffffffffffll
 
+#define F32_INF (INFINITY)
+#define F32_NAN (NAN)
+
 typedef float  f32;
 typedef double f64;
 
 STATIC_ASSERT(sizeof(f32) == 4);
 STATIC_ASSERT(sizeof(f64) == 8);
 
+typedef size_t    umi;
+typedef ptrdiff_t smi;
+
 #define global   static
 #define local    static
 #define internal static
+
+#define SizeOf(type)           ((smi)sizeof(type))
+#define ArrayCount(Array)      ((SizeOf(Array) / SizeOf((Array)[0])) / ((smi)!(SizeOf(Array) % SizeOf((Array)[0]))))
+#define OffsetOf(type, Member) ((smi)&(((type *)0)->Member))
 
 #endif

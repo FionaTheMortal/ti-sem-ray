@@ -1,23 +1,3 @@
-// Notes:
-//
-// When applicable the following conventions are used:
-//
-// 1. We use a right-handed coordinate system where
-//    X is forward
-//    Y is left
-//    Z is up
-// 
-// 2. Rotations use the right hand rule.
-//
-// 3. Rotations are interpreted as active rotations.
-//
-// 4. Euler angles use yaw, pitch, roll Tait–Bryan angles, so when stored as a vector
-//    X is roll
-//    Y is yaw
-//    Z is pitch
-//    and the sequence of rotations is z-y'-x'' in intrinsic rotations
-
-
 #ifndef TI_SEM_RAY_MATH_H
 #define TI_SEM_RAY_MATH_H
 

@@ -7,6 +7,19 @@ struct ray
 	v3f Dir;
 };
 
+struct hit
+{
+	b32 Hit;
+	v3f Normal;
+	f32 T;
+	s32 ObjectIndex;
+};
+
+struct material
+{
+
+};
+
 struct sphere
 {
 	v3f Pos;
@@ -15,7 +28,8 @@ struct sphere
 
 struct plane
 {
-
+	v3f Normal;
+	f32 Distance;
 };
 
 enum object_type
@@ -48,8 +62,22 @@ struct camera
 
 	basis Basis;
 
-	f32 FilmDimX;
-	f32 FilmDimY;
+	f32 VirtualScreenDimX;
+	f32 VirtualScreenDimY;
+};
+
+struct scene
+{
+	object *Objects;
+	s32     ObjectCount;
+	s32     MaxObjectCount;
+};
+
+struct bitmap
+{
+	s32 DimX;
+	s32 DimY;
+	u8 *Pixels;
 };
 
 #endif
