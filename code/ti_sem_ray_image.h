@@ -13,17 +13,6 @@ enum bmp_compression_mode
 	BMPCompressionMode_BI_PNG
 };
 
-// TODO: These shouldn't be macros
-
-#define PUSH_8(Value) \
-	(*FileNext++ = (Value))
-
-#define PUSH_16_LE(Value) \
-	(WriteU16LE(FileNext, (Value)), FileNext += SizeOf(u16))
-
-#define PUSH_32_LE(Value) \
-	(WriteU32LE(FileNext, (Value)), FileNext += SizeOf(u32))
-
 internal void
 BMPWritePixels(const void *Source, void *Dest, u32 SourceChannelCount, u32 DestChannelCount, s32 DimX, s32 DimY, s32 ScanlinePadding)
 {
@@ -89,6 +78,17 @@ BMPWritePixels(const void *Source, void *Dest, u32 SourceChannelCount, u32 DestC
 internal b32
 WriteBMP(const c8 *Filename, const void *Pixels, s32 DimX, s32 DimY, s32 ChannelCount)
 {
+	// TODO: These shouldn't be macros
+
+#define PUSH_8(Value) \
+	(*FileNext++ = (Value))
+
+#define PUSH_16_LE(Value) \
+	(WriteU16LE(FileNext, (Value)), FileNext += SizeOf(u16))
+
+#define PUSH_32_LE(Value) \
+	(WriteU32LE(FileNext, (Value)), FileNext += SizeOf(u32))
+
 	b32 Success = false;
 
 	if (Pixels &&
@@ -183,11 +183,11 @@ WriteBMP(const c8 *Filename, const void *Pixels, s32 DimX, s32 DimY, s32 Channel
 		}
 	}
 
-	return Success;
-}
-
 #undef PUSH_8
 #undef PUSH_16_LE
 #undef PUSH_32_LE
+
+	return Success;
+}
 
 #endif

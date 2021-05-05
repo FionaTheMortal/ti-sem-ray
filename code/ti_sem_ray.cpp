@@ -25,12 +25,43 @@
 //    Z is pitch
 //    and the sequence of rotations is z-y'-x'' in intrinsic rotations
 
+#include <time.h>
+
 #include "ti_sem_ray_def.h"
 #include "ti_sem_ray_math.h"
 #include "ti_sem_ray_memory.h"
 #include "ti_sem_ray_image.h"
 
 #include "ti_sem_ray.h"
+
+struct calendar_time
+{
+	s32 Second;
+	s32 Minute;
+	s32 Hour;
+	s32 Day;
+	s32 Month;
+	s32 Year;
+};
+
+internal calendar_time
+GetLocalCalendarTime()
+{
+	calendar_time Result;
+
+	time_t Now = time(NULL);
+
+	tm *LocalTime = localtime(&Now);
+
+	Result.Second = LocalTime->tm_sec;
+	Result.Minute = LocalTime->tm_min;
+	Result.Hour = LocalTime->tm_hour;
+	Result.Day = LocalTime->tm_mday;
+	Result.Month = LocalTime->tm_mon + 1;
+	Result.Year = LocalTime->tm_year + 1900;
+
+	return Result;
+}
 
 internal f32
 GetCameraAspectRatio(const camera *Camera)
@@ -258,6 +289,7 @@ main(int argc, char *argv)
 	Scene.MaxObjectCount = ArrayCount(Objects);
 
 	AddSphere(&Scene, V3F(4.0f, 0.0f, 0.0f), 1.0f);
+	AddSphere(&Scene, V3F(4.0f, 0.0f, 1.0f), 1.0f);
 
 	camera Camera = {};
 	Camera.Orientation = QuaternionIdentity();
@@ -317,7 +349,14 @@ main(int argc, char *argv)
 		}
 	}
 
-	WriteBMP("test.bmp", Image.Pixels, Image.DimX, Image.DimY, 4);
+	calendar_time Now = GetLocalCalendarTime();
+
+	c8 *Filename = "ray_out";
+	c8 *FilenameExtension = ".bmp";
+	c8 Buffer[128];
+	sprintf(Buffer, "%s-%d-%02d-%02d-%02d%02d%02d%s", Filename, Now.Year, Now.Month, Now.Day, Now.Hour, Now.Minute, Now.Second, FilenameExtension);
+
+	WriteBMP(Buffer, Image.Pixels, Image.DimX, Image.DimY, 4);
 
 	int i = 0;
 }

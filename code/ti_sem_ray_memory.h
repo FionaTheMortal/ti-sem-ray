@@ -46,9 +46,9 @@ ByteSwap(u32 Value)
 {
 	u32 Result =
 		((0xFF & Value) << 24) |
+		(0xFF & (Value >> 24)) |
 		((0xFF00 & Value) << 8) |
-		(0xFF00 & (Value >> 8)) |
-		(0xFF & (Value >> 24));
+		(0xFF00 & (Value >> 8));
 
 	return Result;
 }
@@ -112,6 +112,5 @@ WriteU32LE(void *Pointer, u32 Value)
 	u32 ValueLE = NativeToLE(Value);
 	WriteU32(Pointer, ValueLE);
 }
-
 
 #endif
