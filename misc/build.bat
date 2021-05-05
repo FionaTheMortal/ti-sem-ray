@@ -2,6 +2,8 @@
 
 pushd ..
 
+ctime -begin ti_sem_ray.ctm
+
 set PreprocessorSymbols=
 
 set CompilerOptimizations=-Od -Oi -Gy -fp:except-
@@ -17,3 +19,5 @@ pushd ..\build
 cl %CompilerFlags% -Feti_sem_ray ..\code\ti_sem_ray.cpp /link %LinkerFlags% %LinkedLibraries%
 
 popd
+
+ctime -end ti_sem_ray.ctm

@@ -63,6 +63,20 @@ GetLocalCalendarTime()
 	return Result;
 }
 
+internal void
+PrintTimestampedFilename(c8 *Buffer, const c8 *Filename, const c8 *FileExtension)
+{
+	calendar_time Now = GetLocalCalendarTime();
+
+	sprintf(Buffer, "%s-%d-%02d-%02d-%02d%02d%02d%s", Filename, Now.Year, Now.Month, Now.Day, Now.Hour, Now.Minute, Now.Second, FileExtension);
+}
+
+internal void
+CameraLookAt(camera *Camera, v3f Pos, v3f Up)
+{
+
+}
+
 internal f32
 GetCameraAspectRatio(const camera *Camera)
 {
@@ -273,6 +287,59 @@ AllocBitmap(s32 DimX, s32 DimY)
 	return Result;
 }
 
+internal u32
+RGBA8(u8 R, u8 G, u8 B, u8 A)
+{
+	u32 Result =
+		((u32)R <<  0) |
+		((u32)G <<  8) |
+		((u32)B << 16) |
+		((u32)A << 24);
+
+	return Result;
+}
+
+internal u8
+RGBA8GetR(u32 Value)
+{
+	u8 Result = Value & 0xFF;
+
+	return Result;
+}
+
+internal u8
+RGBA8GetG(u32 Value)
+{
+	u8 Result = (Value >> 8) & 0xFF;
+
+	return Result;
+}
+
+internal u8
+RGBA8GetB(u32 Value)
+{
+	u8 Result = (Value >> 16) & 0xFF;
+
+	return Result;
+}
+
+internal u8
+RGBA8GetA(u32 Value)
+{
+	u8 Result = (Value >> 24) & 0xFF;
+
+	return Result;
+}
+
+internal void
+BitmapWriteRGBA8(bitmap *Bitmap, s32 IndexX, s32 IndexY, u32 Color)
+{
+	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 0] = RGBA8GetR(Color);
+	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 1] = RGBA8GetG(Color);
+	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 2] = RGBA8GetB(Color);
+	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 3] = RGBA8GetA(Color);
+}
+
 internal void
 RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera *Camera)
 {
@@ -293,33 +360,18 @@ RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera 
 
 			hit Hit = IntersectRayScene(&Ray, Scene);
 
-			if (Hit.Hit)
-			{
-				int i = 0;
-			}
-
-			u8 R;
-			u8 G;
-			u8 B;
-			u8 A = 0xFF;
+			u32 Color;
 
 			if (Hit.ObjectIndex != PrevHitObjectIndex)
 			{
-				R = 0x00;
-				G = 0x00;
-				B = 0x00;
+				Color = RGBA8(0x00, 0x00, 0x00, 0xFF);
 			}
 			else
 			{
-				R = 0xFF;
-				G = 0xFF;
-				B = 0xFF;
+				Color = RGBA8(0xFF, 0xFF, 0xFF, 0xFF);
 			}
 
-			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 0] = R;
-			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 1] = G;
-			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 2] = B;
-			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 3] = A;
+			BitmapWriteRGBA8(Image, IndexX, IndexY, Color);
 
 			PrevHitObjectIndex = Hit.ObjectIndex;
 		}
@@ -331,6 +383,9 @@ main(int argc, char **argv)
 {
 	s32 ImageDimX = 512;
 	s32 ImageDimY = 512;
+
+	const c8 *Filename = "ray_out";
+	const c8 *FileExtension = ".bmp";
 
 	bitmap Image = AllocBitmap(ImageDimX, ImageDimY);
 
@@ -353,15 +408,13 @@ main(int argc, char **argv)
 
 	UpdateCamera(&Camera);
 
+
 	RenderSceneByTracingScanlineEdgeTransitions(&Image, &Scene, &Camera);
 
-	calendar_time Now = GetLocalCalendarTime();
 
-	const c8 *Filename = "ray_out";
-	const c8 *FilenameExtension = ".bmp";
-	c8 Buffer[128];
-	
-	sprintf(Buffer, "%s-%d-%02d-%02d-%02d%02d%02d%s", Filename, Now.Year, Now.Month, Now.Day, Now.Hour, Now.Minute, Now.Second, FilenameExtension);
+	c8 TimestampedFilename[128];
 
-	WriteBMP(Buffer, Image.Pixels, Image.DimX, Image.DimY, 4);
+	PrintTimestampedFilename(TimestampedFilename, Filename, FileExtension);
+
+	WriteBMP(TimestampedFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
 }
