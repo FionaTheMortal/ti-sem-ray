@@ -212,7 +212,7 @@ IntersectRayScene(const ray *Ray, const scene *Scene)
 
 		f32 T = IntersectRayObject(Ray, Object);
 
-		if (T < MinT)
+		if (T > 0.0f && T < MinT)
 		{
 			MinT = T;
 			ObjectIndex = Index;
@@ -273,49 +273,25 @@ AllocBitmap(s32 DimX, s32 DimY)
 	return Result;
 }
 
-int
-main(int argc, char *argv)
+internal void
+RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera *Camera)
 {
-	s32 ImageDimX = 512;
-	s32 ImageDimY = 512;
-
-	bitmap Image = AllocBitmap(ImageDimX, ImageDimY);
-
-	object Objects[32] = {};
-
-	scene Scene = {};
-	Scene.Objects = Objects;
-	Scene.ObjectCount = 1;
-	Scene.MaxObjectCount = ArrayCount(Objects);
-
-	AddSphere(&Scene, V3F(4.0f, 0.0f, 0.0f), 1.0f);
-	// AddSphere(&Scene, V3F(4.0f, 0.0f, 1.0f), 1.0f);
-
-	camera Camera = {};
-	Camera.Orientation = QuaternionIdentity();
-	Camera.Pos = V3F(0, 0, 0);
-	Camera.HorizontalFOV = 90.0f;
-	Camera.ResolutionX = ImageDimX;
-	Camera.ResolutionY = ImageDimY;
-
-	UpdateCamera(&Camera);
-
 	s32 PrevHitObjectIndex = 0;
 
 	for (s32 IndexY = 0;
-		IndexY < Camera.ResolutionY;
+		IndexY < Image->DimX;
 		++IndexY)
 	{
 		for (s32 IndexX = 0;
-			IndexX < Camera.ResolutionX;
+			IndexX < Image->DimY;
 			++IndexX)
 		{
 			f32 SampleX = (f32)IndexX + 0.5f;
 			f32 SampleY = (f32)IndexY + 0.5f;
 
-			ray Ray = RayFromVirtualScreenPos(&Camera, SampleX, SampleY);
+			ray Ray = RayFromVirtualScreenPos(Camera, SampleX, SampleY);
 
-			hit Hit = IntersectRayScene(&Ray, &Scene);
+			hit Hit = IntersectRayScene(&Ray, Scene);
 
 			if (Hit.Hit)
 			{
@@ -340,23 +316,52 @@ main(int argc, char *argv)
 				B = 0xFF;
 			}
 
-			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 0] = R;
-			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 1] = G;
-			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 2] = B;
-			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 3] = A;
+			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 0] = R;
+			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 1] = G;
+			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 2] = B;
+			Image->Pixels[4 * (Image->DimX * IndexY + IndexX) + 3] = A;
 
 			PrevHitObjectIndex = Hit.ObjectIndex;
 		}
 	}
+}
+
+int
+main(int argc, char **argv)
+{
+	s32 ImageDimX = 512;
+	s32 ImageDimY = 512;
+
+	bitmap Image = AllocBitmap(ImageDimX, ImageDimY);
+
+	object Objects[32] = {};
+
+	scene Scene = {};
+	Scene.Objects = Objects;
+	Scene.ObjectCount = 1;
+	Scene.MaxObjectCount = ArrayCount(Objects);
+
+	AddSphere(&Scene, V3F(4.0f, 0.0f, 0.0f), 1.0f);
+	AddSphere(&Scene, V3F(3.0f, 0.0f, 1.0f), 0.5f);
+
+	camera Camera = {};
+	Camera.Orientation = QuaternionIdentity();
+	Camera.Pos = V3F(0, 0, 0);
+	Camera.HorizontalFOV = 90.0f;
+	Camera.ResolutionX = ImageDimX;
+	Camera.ResolutionY = ImageDimY;
+
+	UpdateCamera(&Camera);
+
+	RenderSceneByTracingScanlineEdgeTransitions(&Image, &Scene, &Camera);
 
 	calendar_time Now = GetLocalCalendarTime();
 
-	c8 *Filename = "ray_out";
-	c8 *FilenameExtension = ".bmp";
+	const c8 *Filename = "ray_out";
+	const c8 *FilenameExtension = ".bmp";
 	c8 Buffer[128];
+	
 	sprintf(Buffer, "%s-%d-%02d-%02d-%02d%02d%02d%s", Filename, Now.Year, Now.Month, Now.Day, Now.Hour, Now.Minute, Now.Second, FilenameExtension);
 
 	WriteBMP(Buffer, Image.Pixels, Image.DimX, Image.DimY, 4);
-
-	int i = 0;
 }
