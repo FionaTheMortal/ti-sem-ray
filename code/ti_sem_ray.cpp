@@ -25,22 +25,12 @@
 //    Z is pitch
 //    and the sequence of rotations is z-y'-x'' in intrinsic rotations
 
-#include <malloc.h>
-
 #include "ti_sem_ray_def.h"
 #include "ti_sem_ray_math.h"
+#include "ti_sem_ray_memory.h"
+#include "ti_sem_ray_image.h"
 
 #include "ti_sem_ray.h"
-
-#define AllocArray(type, Count) ((type *)AllocMemory(SizeOf(type) * (Count)))
-
-internal void *
-AllocMemory(s32 Size)
-{
-	void *Result = malloc(Size);
-
-	return Result;
-}
 
 internal f32
 GetCameraAspectRatio(const camera *Camera)
@@ -183,7 +173,7 @@ IntersectRayScene(const ray *Ray, const scene *Scene)
 	f32 MinT = F32_INF;
 	s32 ObjectIndex = 0;
 
-	for (s32 Index = 0;
+	for (s32 Index = 1;
 		Index < Scene->ObjectCount;
 		++Index)
 	{
@@ -240,11 +230,14 @@ AddPlane(scene *Scene, v3f Normal, f32 Distance)
 internal bitmap
 AllocBitmap(s32 DimX, s32 DimY)
 {
-	bitmap Result = {};
+	bitmap Result;
+
+	s32 PixelsSize = 4 * DimX * DimY;
+	u8 *Pixels = AllocArray(u8, PixelsSize, true);
 
 	Result.DimX = DimX;
 	Result.DimY = DimY;
-	Result.Pixels = AllocArray(u8, 4 * DimX * DimY);
+	Result.Pixels = Pixels;
 
 	return Result;
 }
@@ -252,14 +245,10 @@ AllocBitmap(s32 DimX, s32 DimY)
 int
 main(int argc, char *argv)
 {
-	camera Camera = {};
-	Camera.Orientation = QuaternionIdentity();
-	Camera.Pos = V3F(0, 0, 0);
-	Camera.HorizontalFOV = 90.0f;
-	Camera.ResolutionX = 512;
-	Camera.ResolutionY = 512;
+	s32 ImageDimX = 512;
+	s32 ImageDimY = 512;
 
-	UpdateCamera(&Camera);
+	bitmap Image = AllocBitmap(ImageDimX, ImageDimY);
 
 	object Objects[32] = {};
 
@@ -268,9 +257,16 @@ main(int argc, char *argv)
 	Scene.ObjectCount = 1;
 	Scene.MaxObjectCount = ArrayCount(Objects);
 
-	AddSphere(&Scene, V3F(2.0f, 0.0f, 0.0f), 1.0f);
+	AddSphere(&Scene, V3F(4.0f, 0.0f, 0.0f), 1.0f);
 
+	camera Camera = {};
+	Camera.Orientation = QuaternionIdentity();
+	Camera.Pos = V3F(0, 0, 0);
+	Camera.HorizontalFOV = 90.0f;
+	Camera.ResolutionX = ImageDimX;
+	Camera.ResolutionY = ImageDimY;
 
+	UpdateCamera(&Camera);
 
 	s32 PrevHitObjectIndex = 0;
 
@@ -291,8 +287,37 @@ main(int argc, char *argv)
 
 			if (Hit.Hit)
 			{
-				// index
+				int i = 0;
 			}
+
+			u8 R;
+			u8 G;
+			u8 B;
+			u8 A = 0xFF;
+
+			if (Hit.ObjectIndex != PrevHitObjectIndex)
+			{
+				R = 0x00;
+				G = 0x00;
+				B = 0x00;
+			}
+			else
+			{
+				R = 0xFF;
+				G = 0xFF;
+				B = 0xFF;
+			}
+
+			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 0] = R;
+			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 1] = G;
+			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 2] = B;
+			Image.Pixels[4 * (Image.DimX * IndexY + IndexX) + 3] = A;
+
+			PrevHitObjectIndex = Hit.ObjectIndex;
 		}
 	}
+
+	WriteBMP("test.bmp", Image.Pixels, Image.DimX, Image.DimY, 4);
+
+	int i = 0;
 }

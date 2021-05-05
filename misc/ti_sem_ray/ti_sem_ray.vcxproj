@@ -159,7 +159,9 @@
   <ItemGroup>
     <ClInclude Include="..\..\code\ti_sem_ray.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_def.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_image.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_math.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_memory.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

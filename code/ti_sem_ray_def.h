@@ -98,4 +98,16 @@ typedef ptrdiff_t smi;
 #define ArrayCount(Array)      ((SizeOf(Array) / SizeOf((Array)[0])) / ((smi)!(SizeOf(Array) % SizeOf((Array)[0]))))
 #define OffsetOf(type, Member) ((smi)&(((type *)0)->Member))
 
+#define Align(Value, Alignment) (((Value) + ((Alignment) - 1)) & (~((Alignment) - 1)))
+
+#if defined(_MSC_VER)
+#define CPU_IS_LITTLE_ENDIAN() (1)
+#elif defined(__GNUC__)
+#ifdef __BYTE_ORDER__
+#define CPU_IS_LITTLE_ENDIAN() (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
+#endif
+#else
+#error ti_sem_ray_def.h - Compiler unknown or not supported
+#endif
+
 #endif
