@@ -2,3 +2,4 @@ build
 misc/ti_sem_ray/temp
 *.user
 .vs
+data

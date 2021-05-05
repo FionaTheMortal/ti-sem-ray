@@ -289,7 +289,7 @@ main(int argc, char *argv)
 	Scene.MaxObjectCount = ArrayCount(Objects);
 
 	AddSphere(&Scene, V3F(4.0f, 0.0f, 0.0f), 1.0f);
-	AddSphere(&Scene, V3F(4.0f, 0.0f, 1.0f), 1.0f);
+	// AddSphere(&Scene, V3F(4.0f, 0.0f, 1.0f), 1.0f);
 
 	camera Camera = {};
 	Camera.Orientation = QuaternionIdentity();
