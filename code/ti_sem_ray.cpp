@@ -45,7 +45,7 @@ struct calendar_time
 };
 
 internal calendar_time
-GetLocalCalendarTime()
+GetCurrentLocalCalendarTime()
 {
 	time_t Now = time(NULL);
 
@@ -63,12 +63,12 @@ GetLocalCalendarTime()
 	return Result;
 }
 
-internal void
-PrintTimestampedFilename(c8 *Buffer, const c8 *Filename, const c8 *FileExtension)
+internal s32
+FormatFilenameTimestamp(c8 *Buffer, s32 BufferSize, calendar_time *Time)
 {
-	calendar_time Now = GetLocalCalendarTime();
+	s32 Result = sprintf_s(Buffer, BufferSize, "%d-%02d-%02d-%02d%02d%02d", Time->Year, Time->Month, Time->Day, Time->Hour, Time->Minute, Time->Second);
 
-	sprintf(Buffer, "%s-%d-%02d-%02d-%02d%02d%02d%s", Filename, Now.Year, Now.Month, Now.Day, Now.Hour, Now.Minute, Now.Second, FileExtension);
+	return Result;
 }
 
 internal void
@@ -408,13 +408,16 @@ main(int argc, char **argv)
 
 	UpdateCamera(&Camera);
 
-
 	RenderSceneByTracingScanlineEdgeTransitions(&Image, &Scene, &Camera);
 
+	c8 Timestamp[64];
+	c8 FullFilename[128];
 
-	c8 TimestampedFilename[128];
+	calendar_time Now = GetCurrentLocalCalendarTime();
 
-	PrintTimestampedFilename(TimestampedFilename, Filename, FileExtension);
+	FormatFilenameTimestamp(Timestamp, SizeOf(Timestamp), &Now);
 
-	WriteBMP(TimestampedFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
+	sprintf_s(FullFilename, SizeOf(FullFilename), "%s-%s%s", Filename, Timestamp, FileExtension);
+
+	WriteBMP(FullFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
 }
