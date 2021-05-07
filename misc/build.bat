@@ -1,7 +1,5 @@
 @echo off
 
-pushd ..
-
 ctime -begin ti_sem_ray.ctm
 
 set PreprocessorSymbols=

@@ -1,5 +1,6 @@
 build
 misc/ti_sem_ray/temp
+*.ctm
 *.user
 .vs
 data

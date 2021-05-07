@@ -347,6 +347,16 @@ QuaternionFromEuler(v3f Angles)
 }
 
 internal quaternion
+QuaternionLookAt(v3f Dir, v3f Up)
+{
+	quaternion Result;
+
+	// TODO
+
+	return Result;
+}
+
+internal quaternion
 operator-(quaternion A)
 {
 	quaternion Result;

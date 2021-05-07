@@ -73,28 +73,28 @@
     <OutDir>$(SolutionDir)..\build</OutDir>
     <IntDir>$(ProjectDir)\temp</IntDir>
     <SourcePath>$(SolutionDir)..\code</SourcePath>
-    <NMakeBuildCommandLine>"$(SolutionDir)build.bat"</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd "$(SolutionDir)" &amp;&amp; "$(SolutionDir)build.bat"</NMakeBuildCommandLine>
     <NMakeOutput>$(SolutionDir)..\build\ti_sem_ray.exe</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)..\build</OutDir>
     <IntDir>$(ProjectDir)\temp</IntDir>
     <SourcePath>$(SolutionDir)..\code</SourcePath>
-    <NMakeBuildCommandLine>"$(SolutionDir)build.bat"</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd "$(SolutionDir)" &amp;&amp; "$(SolutionDir)build.bat"</NMakeBuildCommandLine>
     <NMakeOutput>$(SolutionDir)..\build\ti_sem_ray.exe</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)..\build</OutDir>
     <IntDir>$(ProjectDir)\temp</IntDir>
     <SourcePath>$(SolutionDir)..\code</SourcePath>
-    <NMakeBuildCommandLine>"$(SolutionDir)build.bat"</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd "$(SolutionDir)" &amp;&amp; "$(SolutionDir)build.bat"</NMakeBuildCommandLine>
     <NMakeOutput>$(SolutionDir)..\build\ti_sem_ray.exe</NMakeOutput>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)..\build</OutDir>
     <IntDir>$(ProjectDir)\temp</IntDir>
     <SourcePath>$(SolutionDir)..\code</SourcePath>
-    <NMakeBuildCommandLine>"$(SolutionDir)build.bat"</NMakeBuildCommandLine>
+    <NMakeBuildCommandLine>cd "$(SolutionDir)" &amp;&amp; "$(SolutionDir)build.bat"</NMakeBuildCommandLine>
     <NMakeOutput>$(SolutionDir)..\build\ti_sem_ray.exe</NMakeOutput>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

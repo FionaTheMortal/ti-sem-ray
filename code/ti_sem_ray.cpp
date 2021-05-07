@@ -47,11 +47,11 @@ struct calendar_time
 internal calendar_time
 GetLocalCalendarTime()
 {
-	calendar_time Result;
-
 	time_t Now = time(NULL);
 
 	tm *LocalTime = localtime(&Now);
+
+	calendar_time Result;
 
 	Result.Second = LocalTime->tm_sec;
 	Result.Minute = LocalTime->tm_min;
