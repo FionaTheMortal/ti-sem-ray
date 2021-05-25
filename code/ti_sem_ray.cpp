@@ -30,8 +30,11 @@
 #include "ti_sem_ray_def.h"
 #include "ti_sem_ray_math.h"
 #include "ti_sem_ray_memory.h"
+#include "ti_sem_ray_memory_stream.h"
+#include "ti_sem_ray_os.h"
 #include "ti_sem_ray_image.h"
-
+#include "ti_sem_ray_image_write.h"
+#include "ti_sem_ray_color.h"
 #include "ti_sem_ray.h"
 
 struct calendar_time
@@ -95,7 +98,7 @@ UpdateCamera(camera *Camera)
 }
 
 internal v3f
-WorldPosFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
+CameraSpacePosFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
 {
 	f32 OffsetX = (X / (f32)Camera->ResolutionX) - 0.5f;
 	f32 OffsetY = (Y / (f32)Camera->ResolutionY) - 0.5f;
@@ -113,7 +116,7 @@ RayFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
 {
 	ray Result;
 	
-	v3f FilmPos = WorldPosFromVirtualScreenPos(Camera, X, Y);
+	v3f FilmPos = CameraSpacePosFromVirtualScreenPos(Camera, X, Y);
 
 	Result.Pos = Camera->Pos;
 	Result.Dir = NOZ(FilmPos - Camera->Pos);
@@ -287,50 +290,6 @@ AllocBitmap(s32 DimX, s32 DimY)
 	return Result;
 }
 
-internal u32
-RGBA8(u8 R, u8 G, u8 B, u8 A)
-{
-	u32 Result =
-		((u32)R <<  0) |
-		((u32)G <<  8) |
-		((u32)B << 16) |
-		((u32)A << 24);
-
-	return Result;
-}
-
-internal u8
-RGBA8GetR(u32 Value)
-{
-	u8 Result = Value & 0xFF;
-
-	return Result;
-}
-
-internal u8
-RGBA8GetG(u32 Value)
-{
-	u8 Result = (Value >> 8) & 0xFF;
-
-	return Result;
-}
-
-internal u8
-RGBA8GetB(u32 Value)
-{
-	u8 Result = (Value >> 16) & 0xFF;
-
-	return Result;
-}
-
-internal u8
-RGBA8GetA(u32 Value)
-{
-	u8 Result = (Value >> 24) & 0xFF;
-
-	return Result;
-}
-
 internal void
 BitmapWriteRGBA8(bitmap *Bitmap, s32 IndexX, s32 IndexY, u32 Color)
 {
@@ -419,5 +378,5 @@ main(int argc, char **argv)
 
 	sprintf_s(FullFilename, SizeOf(FullFilename), "%s-%s%s", Filename, Timestamp, FileExtension);
 
-	WriteBMP(FullFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
+	WriteBMPToFile(FullFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
 }

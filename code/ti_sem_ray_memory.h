@@ -4,13 +4,15 @@
 #include <malloc.h>
 #include <string.h>
 
-#define AllocArray(type, Count, ZeroInit) ((type *)AllocMemory(SizeOf(type) * (Count), ZeroInit))
+#define ZeroStruct(Pointer) ZeroMemory(Pointer, sizeof(*Pointer))
 
 internal void
-ZeroMemory(void *Ptr, smi Size)
+ZeroMemory(void *Pointer, smi Size)
 {
-	memset(Ptr, 0, Size);
+	memset(Pointer, 0, Size);
 }
+
+#define AllocArray(type, Count, ZeroInit) ((type *)AllocMemory(SizeOf(type) * (Count), ZeroInit))
 
 internal void *
 AllocMemory(smi Size, b32 ZeroInit)
@@ -26,91 +28,163 @@ AllocMemory(smi Size, b32 ZeroInit)
 }
 
 internal void
+FreeMemory(void *Pointer)
+{
+	free(Pointer);
+}
+
+internal void
 CopyMemory(const void *Source, umi Size, void *Dest)
 {
 	memcpy(Dest, Source, Size);
 }
 
-internal u16
-ByteSwap(u16 Value)
+internal void
+MoveMemory(const void *Source, smi Size, void *Dest)
 {
-	u16 Result =
-		((0xFF & Value) << 8) |
-		(0xFF & (Value >> 8));
-
-	return Result;
-}
-
-internal u32
-ByteSwap(u32 Value)
-{
-	u32 Result =
-		((0xFF & Value) << 24) |
-		(0xFF & (Value >> 24)) |
-		((0xFF00 & Value) << 8) |
-		(0xFF00 & (Value >> 8));
-
-	return Result;
-}
-
-internal u16
-NativeToLE(u16 Value)
-{
-	u16 Result;
-
-	if (CPU_IS_LITTLE_ENDIAN())
-	{
-		Result = Value;
-	}
-	else
-	{
-		Result = ByteSwap(Value);
-	}
-
-	return Result;
-}
-
-internal u32
-NativeToLE(u32 Value)
-{
-	u32 Result;
-
-	if (CPU_IS_LITTLE_ENDIAN())
-	{
-		Result = Value;
-	}
-	else
-	{
-		Result = ByteSwap(Value);
-	}
-
-	return Result;
+	memmove(Dest, Source, Size);
 }
 
 internal void
-WriteU16(void *Pointer, u16 Value)
+Write8(void *Pointer, smi Offset, u8 Value)
 {
-	CopyMemory(&Value, SizeOf(Value), Pointer);
+	u8 *At = (u8 *)Pointer + Offset;
+
+	At[0] = Value;
 }
 
 internal void
-WriteU32(void *Pointer, u32 Value)
+Write16LE(void *Buffer, smi Offset, u16 Value)
 {
-	CopyMemory(&Value, SizeOf(Value), Pointer);
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 0);
+	At[1] = (u8)(Value >> 8);
 }
 
 internal void
-WriteU16LE(void *Pointer, u16 Value)
+Write16BE(void *Buffer, smi Offset, u16 Value)
 {
-	u16 ValueLE = NativeToLE(Value);
-	WriteU16(Pointer, ValueLE);
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 8);
+	At[1] = (u8)(Value >> 0);
 }
 
 internal void
-WriteU32LE(void *Pointer, u32 Value)
+Write32LE(void *Buffer, smi Offset, u32 Value)
 {
-	u32 ValueLE = NativeToLE(Value);
-	WriteU32(Pointer, ValueLE);
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 0);
+	At[1] = (u8)(Value >> 8);
+	At[2] = (u8)(Value >> 16);
+	At[3] = (u8)(Value >> 24);
+}
+
+internal void
+Write32BE(void *Buffer, smi Offset, u32 Value)
+{
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 24);
+	At[1] = (u8)(Value >> 16);
+	At[2] = (u8)(Value >> 8);
+	At[3] = (u8)(Value >> 0);
+}
+
+internal void
+Write64LE(void *Buffer, smi Offset, u64 Value)
+{
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 0);
+	At[1] = (u8)(Value >> 8);
+	At[2] = (u8)(Value >> 16);
+	At[3] = (u8)(Value >> 24);
+	At[4] = (u8)(Value >> 32);
+	At[5] = (u8)(Value >> 40);
+	At[6] = (u8)(Value >> 48);
+	At[7] = (u8)(Value >> 56);
+}
+
+internal void
+Write64BE(void *Buffer, smi Offset, u64 Value)
+{
+	u8 *At = (u8 *)Buffer + Offset;
+
+	At[0] = (u8)(Value >> 56);
+	At[1] = (u8)(Value >> 48);
+	At[2] = (u8)(Value >> 40);
+	At[3] = (u8)(Value >> 32);
+	At[4] = (u8)(Value >> 24);
+	At[5] = (u8)(Value >> 16);
+	At[6] = (u8)(Value >> 8);
+	At[7] = (u8)(Value >> 0);
+}
+
+internal void
+Push8(void *Buffer, smi *Offset, u8 Value)
+{
+	Write8(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push16LE(void *Buffer, smi *Offset, u16 Value)
+{
+	Write16LE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push16BE(void *Buffer, smi *Offset, u16 Value)
+{
+	Write16BE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push32LE(void *Buffer, smi *Offset, u32 Value)
+{
+	Write32LE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push32BE(void *Buffer, smi *Offset, u32 Value)
+{
+	Write32BE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push64LE(void *Buffer, smi *Offset, u32 Value)
+{
+	Write64LE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+Push64BE(void *Buffer, smi *Offset, u32 Value)
+{
+	Write64BE(Buffer, *Offset, Value);
+
+	*Offset += SizeOf(Value);
+}
+
+internal void
+PushZeros(void *Buffer, smi *Offset, smi Size)
+{
+	ZeroMemory((u8 *)Buffer + *Offset, Size);
+
+	*Offset += Size;
 }
 
 #endif

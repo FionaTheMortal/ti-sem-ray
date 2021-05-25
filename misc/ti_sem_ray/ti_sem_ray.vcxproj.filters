@@ -13,5 +13,9 @@
     <ClInclude Include="..\..\code\ti_sem_ray_def.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_image.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_memory.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_color.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_os.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_memory_stream.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_image_write.h" />
   </ItemGroup>
 </Project>

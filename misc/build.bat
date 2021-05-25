@@ -6,7 +6,7 @@ set PreprocessorSymbols=
 
 set CompilerOptimizations=-Od -Oi -Gy -fp:except-
 set CompilerWarnings=-W4 -WX -wd4201 -wd4100 -wd4127 -wd4189 -wd4101 -wd4505 -wd4702 -wd4060 -wd4065 -wd4723 -wd4701 -wd4408
-set CompilerFlags=-nologo -GR- -EHa- -Z7 -Zo -FC -D_CRT_SECURE_NO_WARNINGS %CompilerOptimizations% %CompilerWarnings% %PreprocessorSymbols%
+set CompilerFlags=-nologo -GR- -EHa- -GS- -Z7 -Zo -FC -D_CRT_SECURE_NO_WARNINGS %CompilerOptimizations% %CompilerWarnings% %PreprocessorSymbols%
 
 set LinkedLibraries=
 set LinkerFlags=/incremental:no /opt:ref /SUBSYSTEM:CONSOLE 

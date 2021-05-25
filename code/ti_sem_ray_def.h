@@ -100,14 +100,8 @@ typedef ptrdiff_t smi;
 
 #define Align(Value, Alignment) (((Value) + ((Alignment) - 1)) & (~((Alignment) - 1)))
 
-#if defined(_MSC_VER)
-#define CPU_IS_LITTLE_ENDIAN() (1)
-#elif defined(__GNUC__)
-#ifdef __BYTE_ORDER__
-#define CPU_IS_LITTLE_ENDIAN() (__BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__)
-#endif
-#else
-#error ti_sem_ray_def.h - Compiler unknown or not supported
-#endif
+#define KILOBYTES(Value) (1024 * (Value)) 
+#define MEGABYTES(Value) (1024 * KILOBYTES(Value)) 
+#define GIGABYTES(Value) (1024 * MEGABYTES(Value)) 
 
 #endif

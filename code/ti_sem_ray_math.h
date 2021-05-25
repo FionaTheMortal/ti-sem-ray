@@ -44,6 +44,18 @@ struct basis
 	v3f Z;
 };
 
+internal smi
+Min(smi A, smi B)
+{
+	return (A < B) ? A : B;
+}
+
+internal smi
+Min(smi A, smi B, smi C)
+{
+	return Min(Min(A, B), C);
+}
+
 internal f32
 Sqrt(f32 Value)
 {
