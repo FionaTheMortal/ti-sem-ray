@@ -32,47 +32,12 @@
 #include "ti_sem_ray_memory.h"
 #include "ti_sem_ray_memory_stream.h"
 #include "ti_sem_ray_os.h"
+#include "ti_sem_ray_time.h"
+#include "ti_sem_ray_color.h"
 #include "ti_sem_ray_image.h"
 #include "ti_sem_ray_image_write.h"
-#include "ti_sem_ray_color.h"
 #include "ti_sem_ray.h"
 
-struct calendar_time
-{
-	s32 Second;
-	s32 Minute;
-	s32 Hour;
-	s32 Day;
-	s32 Month;
-	s32 Year;
-};
-
-internal calendar_time
-GetCurrentLocalCalendarTime()
-{
-	time_t Now = time(NULL);
-
-	tm *LocalTime = localtime(&Now);
-
-	calendar_time Result;
-
-	Result.Second = LocalTime->tm_sec;
-	Result.Minute = LocalTime->tm_min;
-	Result.Hour = LocalTime->tm_hour;
-	Result.Day = LocalTime->tm_mday;
-	Result.Month = LocalTime->tm_mon + 1;
-	Result.Year = LocalTime->tm_year + 1900;
-
-	return Result;
-}
-
-internal s32
-FormatFilenameTimestamp(c8 *Buffer, s32 BufferSize, calendar_time *Time)
-{
-	s32 Result = sprintf_s(Buffer, BufferSize, "%d-%02d-%02d-%02d%02d%02d", Time->Year, Time->Month, Time->Day, Time->Hour, Time->Minute, Time->Second);
-
-	return Result;
-}
 
 internal void
 CameraLookAt(camera *Camera, v3f Pos, v3f Up)
@@ -275,41 +240,36 @@ AddPlane(scene *Scene, v3f Normal, f32 Distance)
 	}
 }
 
-internal bitmap
-AllocBitmap(s32 DimX, s32 DimY)
+internal c8 *
+FormatDefaultOutputFilename(c8 *Buffer, smi BufferSize)
 {
-	bitmap Result;
+	c8 Timestamp[128];
 
-	s32 PixelsSize = 4 * DimX * DimY;
-	u8 *Pixels = AllocArray(u8, PixelsSize, true);
+	c8 *Filename = "ray_out";
+	c8 *FileExtension = ".bmp";
 
-	Result.DimX = DimX;
-	Result.DimY = DimY;
-	Result.Pixels = Pixels;
+	calendar_time Now = GetLocalCalendarTime();
 
-	return Result;
+	FormatFilenameTimestamp(Timestamp, SizeOf(Timestamp), &Now);
+
+	sprintf_s(Buffer, BufferSize, "%s-%s%s", Filename, Timestamp, FileExtension);
+
+	return Buffer;
 }
 
 internal void
-BitmapWriteRGBA8(bitmap *Bitmap, s32 IndexX, s32 IndexY, u32 Color)
+TraceEdgeTransitions(render_context *Context, scene *Scene, camera *Camera)
 {
-	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 0] = RGBA8GetR(Color);
-	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 1] = RGBA8GetG(Color);
-	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 2] = RGBA8GetB(Color);
-	Bitmap->Pixels[4 * (Bitmap->DimX * IndexY + IndexX) + 3] = RGBA8GetA(Color);
-}
+	bitmap *Output = &Context->Output;
 
-internal void
-RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera *Camera)
-{
 	s32 PrevHitObjectIndex = 0;
 
 	for (s32 IndexY = 0;
-		IndexY < Image->DimX;
+		IndexY < Output->DimX;
 		++IndexY)
 	{
 		for (s32 IndexX = 0;
-			IndexX < Image->DimY;
+			IndexX < Output->DimY;
 			++IndexX)
 		{
 			f32 SampleX = (f32)IndexX + 0.5f;
@@ -330,7 +290,7 @@ RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera 
 				Color = RGBA8(0xFF, 0xFF, 0xFF, 0xFF);
 			}
 
-			BitmapWriteRGBA8(Image, IndexX, IndexY, Color);
+			BitmapWriteRGBA8(Output, IndexX, IndexY, Color);
 
 			PrevHitObjectIndex = Hit.ObjectIndex;
 		}
@@ -340,13 +300,12 @@ RenderSceneByTracingScanlineEdgeTransitions(bitmap *Image, scene *Scene, camera 
 int
 main(int argc, char **argv)
 {
-	s32 ImageDimX = 512;
-	s32 ImageDimY = 512;
-
-	const c8 *Filename = "ray_out";
-	const c8 *FileExtension = ".bmp";
-
-	bitmap Image = AllocBitmap(ImageDimX, ImageDimY);
+	render_context Context = {};
+	Context.Mode = RenderMode_TraceEdgeTransitions;
+	Context.OutputDimX = 512;
+	Context.OutputDimY = 512;
+	Context.OutputFilename = 0;
+	Context.Output = AllocBitmap(Context.OutputDimX, Context.OutputDimY, 4);
 
 	object Objects[32] = {};
 
@@ -362,21 +321,25 @@ main(int argc, char **argv)
 	Camera.Orientation = QuaternionIdentity();
 	Camera.Pos = V3F(0, 0, 0);
 	Camera.HorizontalFOV = 90.0f;
-	Camera.ResolutionX = ImageDimX;
-	Camera.ResolutionY = ImageDimY;
+	Camera.ResolutionX = Context.OutputDimX;
+	Camera.ResolutionY = Context.OutputDimX;
 
 	UpdateCamera(&Camera);
 
-	RenderSceneByTracingScanlineEdgeTransitions(&Image, &Scene, &Camera);
+	switch (Context.Mode)
+	{
+		case RenderMode_TraceEdgeTransitions:
+		{
+			TraceEdgeTransitions(&Context, &Scene, &Camera);
+		} break;
+	}
 
-	c8 Timestamp[64];
-	c8 FullFilename[128];
+	c8 FilenameBuffer[256];
 
-	calendar_time Now = GetCurrentLocalCalendarTime();
+	if (!Context.OutputFilename)
+	{
+		Context.OutputFilename = FormatDefaultOutputFilename(FilenameBuffer, SizeOf(FilenameBuffer));
+	}
 
-	FormatFilenameTimestamp(Timestamp, SizeOf(Timestamp), &Now);
-
-	sprintf_s(FullFilename, SizeOf(FullFilename), "%s-%s%s", Filename, Timestamp, FileExtension);
-
-	WriteBMPToFile(FullFilename, Image.Pixels, Image.DimX, Image.DimY, 4);
+	WriteBMPToFile(Context.OutputFilename, Context.Output.Pixels, Context.Output.DimX, Context.Output.DimY, Context.Output.ChannelCount);
 }

@@ -73,11 +73,21 @@ struct scene
 	s32     MaxObjectCount;
 };
 
-struct bitmap
+enum render_mode
 {
-	s32 DimX;
-	s32 DimY;
-	u8 *Pixels;
+	RenderMode_TraceEdgeTransitions = 0,
+};
+
+struct render_context
+{
+	s32 Mode;
+
+	const c8 *OutputFilename;
+
+	s32 OutputDimX;
+	s32 OutputDimY;
+
+	bitmap Output;
 };
 
 #endif
