@@ -361,6 +361,8 @@ QuaternionFromEuler(v3f Angles)
 internal quaternion
 QuaternionFromM44(m44 M)
 {
+	// NOTE: Algorithm taken from https://www.euclideanspace.com/maths/geometry/rotations/conversions/matrixToQuaternion/
+
 	quaternion Result;
 
 	f32 Trace33 = M.E[0][0] + M.E[1][1] + M.E[2][2];

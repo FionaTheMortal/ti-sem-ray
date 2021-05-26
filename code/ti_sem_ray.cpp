@@ -29,6 +29,7 @@
 
 #include "ti_sem_ray_def.h"
 #include "ti_sem_ray_math.h"
+#include "ti_sem_ray_random.h"
 #include "ti_sem_ray_memory.h"
 #include "ti_sem_ray_memory_stream.h"
 #include "ti_sem_ray_os.h"
@@ -251,6 +252,15 @@ TraceEdgeTransitions(render_context *Context, scene *Scene, camera *Camera)
 int
 main(int argc, char **argv)
 {
+	{
+		lcg32 Random = LCG32(1);
+
+		for (;;)
+		{
+			f32 Float = RandomNextF32Bilateral(&Random);
+		}
+	}
+
 	render_context Context = {};
 	Context.Mode = RenderMode_TraceEdgeTransitions;
 	Context.OutputDimX = 512;
@@ -294,6 +304,8 @@ main(int argc, char **argv)
 	{
 		Context.OutputFilename = FormatDefaultOutputFilename(FilenameBuffer, SizeOf(FilenameBuffer));
 	}
+
+	// TODO: sRGB correction
 
 	WriteBMPToFile(Context.OutputFilename, Context.Output.Pixels, Context.Output.DimX, Context.Output.DimY, Context.Output.ChannelCount);
 }

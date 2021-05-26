@@ -17,6 +17,11 @@ enum bmp_compression_mode
 	BMPCompressionMode_BI_PNG
 };
 
+enum bmp_color_space
+{
+	BMPColorSpace_LCS_CALIBRATED_RGB = 0,
+};
+
 enum write_bmp_state
 {
 	WriteBMPState_Error = -1,
@@ -326,7 +331,9 @@ WriteBMP_ProcessHeader(write_bmp *Context)
 		Push32LE(Dst, &DstNext, 0x000000FF);
 		Push32LE(Dst, &DstNext, 0xFF000000);
 
-		s32 RemainingHeaderSize = InfoHeaderSize - 56;
+		Push32LE(Dst, &DstNext, BMPColorSpace_LCS_CALIBRATED_RGB);
+
+		s32 RemainingHeaderSize = InfoHeaderSize - 52;
 
 		PushZeros(Dst, &DstNext, RemainingHeaderSize);
 	}

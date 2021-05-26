@@ -167,6 +167,7 @@
     <ClInclude Include="..\..\code\ti_sem_ray_memory.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_memory_stream.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_os.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_random.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_time.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
