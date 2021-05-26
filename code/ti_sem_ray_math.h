@@ -359,11 +359,63 @@ QuaternionFromEuler(v3f Angles)
 }
 
 internal quaternion
-QuaternionLookAt(v3f Dir, v3f Up)
+QuaternionFromM44(m44 M)
 {
 	quaternion Result;
 
-	// TODO
+	f32 Trace33 = M.E[0][0] + M.E[1][1] + M.E[2][2];
+
+	if (Trace33 > 0)
+	{
+		f32 S = 0.5f / Sqrt(Trace33 + 1.0f);
+
+		Result.W = 0.25f / S;
+		Result.X = (M.E[2][1] - M.E[1][2]) * S;
+		Result.Y = (M.E[0][2] - M.E[2][0]) * S;
+		Result.Z = (M.E[1][0] - M.E[0][1]) * S;
+	}
+	else
+	{
+		if (M.E[0][0] > M.E[1][1] && M.E[0][0] > M.E[2][2])
+		{
+			f32 S = 2.0f * Sqrt(1.0f + M.E[0][0] - M.E[1][1] - M.E[2][2]);
+
+			Result.W = (M.E[2][1] - M.E[1][2]) / S;
+			Result.X = 0.25f * S;
+			Result.Y = (M.E[0][1] + M.E[1][0]) / S;
+			Result.Z = (M.E[0][2] + M.E[2][0]) / S;
+		}
+		else if (M.E[1][1] > M.E[2][2])
+		{
+			f32 S = 2.0f * sqrtf(1.0f + M.E[1][1] - M.E[0][0] - M.E[2][2]);
+
+			Result.W = (M.E[0][2] - M.E[2][0]) / S;
+			Result.X = (M.E[0][1] + M.E[1][0]) / S;
+			Result.Y = 0.25f * S;
+			Result.Z = (M.E[1][2] + M.E[2][1]) / S;
+		}
+		else
+		{
+			f32 S = 2.0f * sqrtf(1.0f + M.E[2][2] - M.E[0][0] - M.E[1][1]);
+
+			Result.W = (M.E[1][0] - M.E[0][1]) / S;
+			Result.X = (M.E[0][2] + M.E[2][0]) / S;
+			Result.Y = (M.E[1][2] + M.E[2][1]) / S;
+			Result.Z = 0.25f * S;
+		}
+	}
+
+	return Result;
+}
+
+internal m44 M44LookAt(v3f Dir, v3f Up);
+
+internal quaternion
+QuaternionLookAt(v3f Dir, v3f Up)
+{
+	m44 Matrix = M44LookAt(Dir, Up);
+
+	quaternion Result = QuaternionFromM44(Matrix);
 
 	return Result;
 }
@@ -625,6 +677,24 @@ M44FromQuaternion(quaternion Quaternion)
 	return Result;
 }
 
+internal m44
+M44LookAt(v3f Dir, v3f Up)
+{
+	v3f X = Dir;
+	v3f Y = Cross(Up, X);
+	v3f Z = Cross(X, Y);
+
+	m44 Result =
+	{
+		 X.X,  Y.X,  Z.X, 0.0f,
+		 X.Y,  Y.Y,  Z.Y, 0.0f,
+		 X.Z,  Y.Z,  Z.Z, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
+	};
+
+	return Result;
+}
+
 // -- basis
 
 internal basis
@@ -648,6 +718,22 @@ BasisFromQuaternion(quaternion value)
 	Result.X = V3F(1.0f - Y2 - Z2,        XY + WZ,        XZ - WY);
 	Result.Y = V3F(       XY - WZ, 1.0f - X2 - Z2,        YZ + WX);
 	Result.Z = V3F(       XZ + WY,        YZ - WX, 1.0f - X2 - Y2);
+
+	return Result;
+}
+
+internal basis
+BasisLookAt(v3f Dir, v3f Up)
+{
+	basis Result;
+
+	v3f X = Dir;
+	v3f Y = Cross(Up, X);
+	v3f Z = Cross(X, Y);
+
+	Result.X = X;
+	Result.Y = Y;
+	Result.Z = Z;
 
 	return Result;
 }

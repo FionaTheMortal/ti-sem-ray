@@ -158,6 +158,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\code\ti_sem_ray.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_camera.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_color.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_def.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_image.h" />

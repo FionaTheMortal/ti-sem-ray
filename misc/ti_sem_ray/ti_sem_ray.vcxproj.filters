@@ -18,5 +18,6 @@
     <ClInclude Include="..\..\code\ti_sem_ray_memory_stream.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_image_write.h" />
     <ClInclude Include="..\..\code\ti_sem_ray_time.h" />
+    <ClInclude Include="..\..\code\ti_sem_ray_camera.h" />
   </ItemGroup>
 </Project>

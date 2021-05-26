@@ -36,58 +36,9 @@
 #include "ti_sem_ray_color.h"
 #include "ti_sem_ray_image.h"
 #include "ti_sem_ray_image_write.h"
+
 #include "ti_sem_ray.h"
-
-
-internal void
-CameraLookAt(camera *Camera, v3f Pos, v3f Up)
-{
-
-}
-
-internal f32
-GetCameraAspectRatio(const camera *Camera)
-{
-	f32 Result = ((f32)Camera->ResolutionY / (f32)Camera->ResolutionX);
-	
-	return Result;
-}
-
-internal void
-UpdateCamera(camera *Camera)
-{
-	Camera->Basis = BasisFromQuaternion(Camera->Orientation);
-
-	Camera->VirtualScreenDimX = 2.0f * Tan(Camera->HorizontalFOV / 2.0f);
-	Camera->VirtualScreenDimY = GetCameraAspectRatio(Camera) *  Camera->VirtualScreenDimX;
-}
-
-internal v3f
-CameraSpacePosFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
-{
-	f32 OffsetX = (X / (f32)Camera->ResolutionX) - 0.5f;
-	f32 OffsetY = (Y / (f32)Camera->ResolutionY) - 0.5f;
-
-	v3f Result = 
-		Camera->Basis.X + 
-		Camera->Basis.Y * (-OffsetX) + 
-		Camera->Basis.Z *  OffsetY;
-
-	return Result;
-}
-
-internal ray
-RayFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
-{
-	ray Result;
-	
-	v3f FilmPos = CameraSpacePosFromVirtualScreenPos(Camera, X, Y);
-
-	Result.Pos = Camera->Pos;
-	Result.Dir = NOZ(FilmPos - Camera->Pos);
-
-	return Result;
-}
+#include "ti_sem_ray_camera.h"
 
 // -- Intersection functions. These are based on algorithms given in 'Real-Time Collision Detection' by Christer Ericson
 
@@ -318,12 +269,15 @@ main(int argc, char **argv)
 	AddSphere(&Scene, V3F(3.0f, 0.0f, 1.0f), 0.5f);
 
 	camera Camera = {};
-	Camera.Orientation = QuaternionIdentity();
 	Camera.Pos = V3F(0, 0, 0);
 	Camera.HorizontalFOV = 90.0f;
 	Camera.ResolutionX = Context.OutputDimX;
 	Camera.ResolutionY = Context.OutputDimX;
 
+	v3f CameraFocus = V3F(1.0f, 0.0f, 0.5f);
+	v3f CameraUp = V3F(0.0f, 0.0f, 1.0f);
+
+	CameraLookAt(&Camera, CameraFocus, CameraUp);
 	UpdateCamera(&Camera);
 
 	switch (Context.Mode)

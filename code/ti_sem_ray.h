@@ -49,23 +49,6 @@ struct object
 	};
 };
 
-struct camera
-{
-	quaternion Orientation;
-	
-	v3f Pos;
-
-	f32 HorizontalFOV;
-
-	s32 ResolutionX;
-	s32 ResolutionY;
-
-	basis Basis;
-
-	f32 VirtualScreenDimX;
-	f32 VirtualScreenDimY;
-};
-
 struct scene
 {
 	object *Objects;
