@@ -209,10 +209,36 @@ FormatDefaultOutputFilename(c8 *Buffer, smi BufferSize)
 	return Buffer;
 }
 
+internal render_buffer
+AllocRenderBuffer(s32 DimX, s32 DimY)
+{
+	render_buffer Result = {};
+
+	Result.DimX = DimX;
+	Result.DimY = DimY;
+	Result.Pixels = AllocArray(v3f, DimX * DimY, true);
+
+	return Result;
+}
+
+internal void
+RenderBufferSetPixel(render_buffer *Buffer, s32 X, s32 Y, v3f Color)
+{
+	Buffer->Pixels[X + Y * Buffer->DimX] = Color;
+}
+
+internal v3f
+RenderBufferGetPixel(render_buffer *Buffer, s32 X, s32 Y)
+{
+	v3f Result = Buffer->Pixels[X + Y * Buffer->DimX];
+
+	return Result;
+}
+
 internal void
 TraceEdgeTransitions(render_context *Context, scene *Scene, camera *Camera)
 {
-	bitmap *Output = &Context->Output;
+	render_buffer *Output = &Context->Output;
 
 	s32 PrevHitObjectIndex = 0;
 
@@ -231,20 +257,51 @@ TraceEdgeTransitions(render_context *Context, scene *Scene, camera *Camera)
 
 			hit Hit = IntersectRayScene(&Ray, Scene);
 
-			u32 Color;
+			v3f Color;
 
 			if (Hit.ObjectIndex != PrevHitObjectIndex)
 			{
-				Color = RGBA8(0x00, 0x00, 0x00, 0xFF);
+				Color = V3F(0, 0, 0);
 			}
 			else
 			{
-				Color = RGBA8(0xFF, 0xFF, 0xFF, 0xFF);
+				Color = V3F(1, 1, 1);
 			}
 
-			BitmapWriteRGBA8(Output, IndexX, IndexY, Color);
+			RenderBufferSetPixel(Output, IndexX, IndexY, Color);
 
 			PrevHitObjectIndex = Hit.ObjectIndex;
+		}
+	}
+}
+
+
+internal void
+ResolveRenderBufferToBitmap(render_buffer *Buffer, bitmap *Result, b32 ConvertTosRGB)
+{
+	for (s32 Y = 0;
+		Y < Result->DimY;
+		++Y)
+	{
+		for (s32 X = 0;
+			X < Result->DimX;
+			++X)
+		{
+			v3f Color = RenderBufferGetPixel(Buffer, X, Y);
+
+			if (ConvertTosRGB)
+			{
+				Color = LinearTosRGB(Color);
+			}
+
+			u8 R = (u8)(255.0f * Color.R);
+			u8 G = (u8)(255.0f * Color.G);
+			u8 B = (u8)(255.0f * Color.B);
+			u8 A = 0xFF;
+
+			u32 Color8 = RGBA8(R, G, B, A);
+
+			BitmapWriteRGBA8(Result, X, Y, Color8);
 		}
 	}
 }
@@ -252,21 +309,12 @@ TraceEdgeTransitions(render_context *Context, scene *Scene, camera *Camera)
 int
 main(int argc, char **argv)
 {
-	{
-		lcg32 Random = LCG32(1);
-
-		for (;;)
-		{
-			f32 Float = RandomNextF32Bilateral(&Random);
-		}
-	}
-
 	render_context Context = {};
 	Context.Mode = RenderMode_TraceEdgeTransitions;
 	Context.OutputDimX = 512;
 	Context.OutputDimY = 512;
 	Context.OutputFilename = 0;
-	Context.Output = AllocBitmap(Context.OutputDimX, Context.OutputDimY, 4);
+	Context.Output = AllocRenderBuffer(Context.OutputDimX, Context.OutputDimY);
 
 	object Objects[32] = {};
 
@@ -305,7 +353,9 @@ main(int argc, char **argv)
 		Context.OutputFilename = FormatDefaultOutputFilename(FilenameBuffer, SizeOf(FilenameBuffer));
 	}
 
-	// TODO: sRGB correction
+	bitmap Output = AllocBitmap(Context.OutputDimX, Context.OutputDimY, 4);
 
-	WriteBMPToFile(Context.OutputFilename, Context.Output.Pixels, Context.Output.DimX, Context.Output.DimY, Context.Output.ChannelCount);
+	ResolveRenderBufferToBitmap(&Context.Output, &Output, true);
+
+	WriteBMPToFile(Context.OutputFilename, Output.Pixels, Output.DimX, Output.DimY, Output.ChannelCount);
 }

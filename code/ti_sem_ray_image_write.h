@@ -22,6 +22,8 @@ enum bmp_color_space
 	BMPColorSpace_LCS_CALIBRATED_RGB = 0,
 };
 
+#include <Windows.h>
+
 enum write_bmp_state
 {
 	WriteBMPState_Error = -1,

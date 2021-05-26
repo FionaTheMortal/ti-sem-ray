@@ -17,7 +17,8 @@ struct hit
 
 struct material
 {
-
+	v3f Color;
+	f32 Shinyness;
 };
 
 struct sphere
@@ -61,6 +62,14 @@ enum render_mode
 	RenderMode_TraceEdgeTransitions = 0,
 };
 
+struct render_buffer
+{
+	s32 DimX;
+	s32 DimY;
+
+	v3f *Pixels;
+};
+
 struct render_context
 {
 	s32 Mode;
@@ -70,7 +79,7 @@ struct render_context
 	s32 OutputDimX;
 	s32 OutputDimY;
 
-	bitmap Output;
+	render_buffer Output;
 };
 
 #endif

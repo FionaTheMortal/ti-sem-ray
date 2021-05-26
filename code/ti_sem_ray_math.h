@@ -97,6 +97,14 @@ Tan(f32 Value)
 }
 
 internal f32
+Pow(f32 Base, f32 Exponent)
+{
+	f32 Result = powf(Base, Exponent);
+
+	return Result;
+}
+
+internal f32
 DegToRad(f32 Angle)
 {
 	f32 Result = (PI32 / 180.0f) * Angle;

@@ -45,4 +45,62 @@ RGBA8GetA(u32 Value)
 	return Result;
 }
 
+internal f32
+LinearTosRGB(f32 Color)
+{
+	f32 Result;
+
+	if (Color <= 0.00313066844250063f)
+	{
+		Result = Color * 12.92f;
+	}
+	else
+	{
+		Result = 1.055f * Pow(Color, 1.0f/2.4f) - 0.055f;
+	}
+
+	return Result;
+}
+
+internal f32
+sRGBToLinear(f32 Color)
+{
+	f32 Result;
+
+	if (Color <= 0.0404482362771082f)
+	{
+		Result = Color / 12.92f;
+	}
+	else
+	{
+		Result = Pow((Color + 0.055f) / 1.055f, 2.4f);
+	}
+
+	return Result;
+}
+
+internal v3f
+LinearTosRGB(v3f Color)
+{
+	v3f Result;
+
+	Result.R = LinearTosRGB(Color.R);
+	Result.G = LinearTosRGB(Color.G);
+	Result.B = LinearTosRGB(Color.B);
+
+	return Result;
+}
+
+internal v3f
+sRGBToLinear(v3f Color)
+{
+	v3f Result;
+
+	Result.R = sRGBToLinear(Color.R);
+	Result.G = sRGBToLinear(Color.G);
+	Result.B = sRGBToLinear(Color.B);
+
+	return Result;
+}
+
 #endif
