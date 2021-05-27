@@ -11,14 +11,9 @@ struct hit
 {
 	b32 Hit;
 	v3f Normal;
-	f32 T;
+	v3f Position;
+	v3f ViewDirection;
 	s32 ObjectIndex;
-};
-
-struct material
-{
-	v3f Color;
-	f32 Shinyness;
 };
 
 struct sphere
@@ -39,8 +34,18 @@ enum object_type
 	ObjectType_Plane,
 };
 
+struct material
+{
+	v3f DiffuseColor;
+	v3f SpecularColor;
+	v3f AmbientColor;
+	f32 Shininess;
+};
+
 struct object
 {
+	s32 MaterialIndex;
+	
 	object_type Type;
 
 	union
@@ -50,16 +55,33 @@ struct object
 	};
 };
 
+struct light
+{
+	v3f Position;
+	v3f Intensity;
+};
+
 struct scene
 {
+	v3f BackgroundColor;
+
+	material *Materials;
+	s32       MaterialCount;
+	s32       MaxMaterialCount;
+
 	object *Objects;
 	s32     ObjectCount;
 	s32     MaxObjectCount;
+
+	light *Lights;
+	s32    LighCount;
+	s32    MaxLightCount;
 };
 
 enum render_mode
 {
 	RenderMode_TraceEdgeTransitions = 0,
+	RenderMode_RecursiveRaytracing
 };
 
 struct render_buffer

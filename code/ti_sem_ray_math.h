@@ -57,6 +57,31 @@ Min(smi A, smi B, smi C)
 }
 
 internal f32
+Clamp(f32 Min, f32 Value, f32 Max)
+{
+	f32 Result = Value;
+
+	if (Value < Min)
+	{
+		Result = Min;
+	}
+	else if (Value > Max)
+	{
+		Result = Max;
+	}
+
+	return Result;
+}
+
+internal f32
+Clamp01(f32 Value)
+{
+	f32 Result = Clamp(0.0f, Value, 1.0f);
+
+	return Result;
+}
+
+internal f32
 Sqrt(f32 Value)
 {
 	f32 Result = sqrtf(Value);
@@ -691,7 +716,7 @@ internal m44
 M44LookAt(v3f Dir, v3f Up)
 {
 	v3f X = Dir;
-	v3f Y = Cross(Up, X);
+	v3f Y = NOZ(Cross(Up, X));
 	v3f Z = Cross(X, Y);
 
 	m44 Result =

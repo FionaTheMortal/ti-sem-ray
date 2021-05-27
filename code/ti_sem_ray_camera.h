@@ -66,7 +66,7 @@ RayFromVirtualScreenPos(const camera *Camera, f32 X, f32 Y)
 	v3f FilmPos = CameraSpacePosFromVirtualScreenPos(Camera, X, Y);
 
 	Result.Pos = Camera->Pos;
-	Result.Dir = NOZ(FilmPos - Camera->Pos);
+	Result.Dir = NOZ(FilmPos);
 
 	return Result;
 }

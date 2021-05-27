@@ -4,7 +4,7 @@
 #define WRITE_BMP_MIN_DIM (1)
 #define WRITE_BMP_MAX_DIM (1 << 15)
 
-#define WRITE_BMP_MIN_DST_REFILL_SIZE (128)
+#define WRITE_BMP_MIN_DST_REFILL_SIZE (256)
 #define WRITE_BMP_MIN_SRC_REFILL_SIZE (32)
 
 enum bmp_compression_mode
@@ -20,6 +20,7 @@ enum bmp_compression_mode
 enum bmp_color_space
 {
 	BMPColorSpace_LCS_CALIBRATED_RGB = 0,
+	BMPColorSpace_LCS_sRGB = 1934772034,
 };
 
 #include <Windows.h>
@@ -280,17 +281,15 @@ WriteBMP_ProcessHeader(write_bmp *Context)
 
 	b32 HasAlphaChannel = (Context->SrcChannelCount == 2) || (Context->SrcChannelCount == 4);
 	s32 DstChannelCount = Context->DstChannelCount;
-	s32 InfoHeaderSize;
+	s32 InfoHeaderSize = 124;
 	s32 CompressionMode;
 
 	if (HasAlphaChannel)
 	{
-		InfoHeaderSize = 108;
 		CompressionMode = BMPCompressionMode_BI_BITFIELDS;
 	}
 	else
 	{
-		InfoHeaderSize = 40;
 		CompressionMode = BMPCompressionMode_BI_RGB;
 	}
 
@@ -333,7 +332,7 @@ WriteBMP_ProcessHeader(write_bmp *Context)
 		Push32LE(Dst, &DstNext, 0x000000FF);
 		Push32LE(Dst, &DstNext, 0xFF000000);
 
-		Push32LE(Dst, &DstNext, BMPColorSpace_LCS_CALIBRATED_RGB);
+		Push32LE(Dst, &DstNext, BMPColorSpace_LCS_sRGB);
 
 		s32 RemainingHeaderSize = InfoHeaderSize - 52;
 
